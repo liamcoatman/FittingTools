@@ -18,6 +18,56 @@ on both of these parameters.
 import pandas as pd 
 import numpy as np 
 import emcee 
+# from PlottingTools.triangle_plot import triangle_plot
+import matplotlib.pyplot as plt 
+from PlottingTools.plot_setup import figsize, set_plot_properties
+import palettable 
+
+
+def scatter_plot(trace):
+
+
+    # Configure style of plot 
+    set_plot_properties() 
+
+    # Change color map 
+    cs = palettable.colorbrewer.qualitative.Set1_3.mpl_colors
+
+    # Set up figure 
+    fig, ax = plt.subplots(figsize=figsize(0.75, vscale=0.9))
+
+    # Get data
+    xi, yi, dxi, dyi, rho_xy = get_data() 
+    xi = xi + 3.0
+
+    # Plot data 
+    ax.errorbar(xi, yi, xerr=dxi, yerr=dyi, linestyle='', color='grey', alpha=0.4, zorder=2)
+    ax.scatter(xi, yi, color=cs[1], s=8, zorder=3)
+
+    logx = np.linspace(3.2, 4, 50)
+  
+    #----------------Plot fit--------------------------------   
+    m, b = trace[:2]
+    yfit = b[:, None] + m[:, None] * (logx - 3.0) 
+    mu = yfit.mean(0)
+    sig = 2 * yfit.std(0)
+
+    ax.plot(logx, mu, 'k', linestyle='-', zorder=5)
+    ax.fill_between(logx, mu - sig, mu + sig, color=palettable.colorbrewer.qualitative.Pastel1_6.mpl_colors[1], zorder=1)
+
+    #--------------------------------------------------------
+
+    ax.set_xlim(3.3, 4)
+    ax.set_ylim(ax.get_xlim())
+
+    ax.set_xlabel(r'log FWHM H$\alpha$ [km~$\rm{s}^{-1}$]')
+    ax.set_ylabel(r'log FWHM H$\beta$ [km~$\rm{s}^{-1}$]')
+
+    fig.tight_layout()
+
+    plt.show()
+
+    return None 
 
 def get_m_b(beta):
 
@@ -173,6 +223,7 @@ def fit_model():
     sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, dX], threads=ncores)
     sampler.run_mcmc(starting_guesses, nsteps)
 
+    # Reshape trace, remove burnin. 
     trace = sampler.chain[:, nburn:, :].reshape(-1, ndim).T
     
     # Convert to slope, intercept representation 
@@ -185,4 +236,20 @@ def fit_model():
 
 if __name__ == '__main__':
 
+    # fit model 
     fit_model()
+
+    # plot data + model 
+    trace = np.load('trace.npy')
+    scatter_plot(trace)
+
+    # triangle plot of chains 
+    trace[1, :] = (10**trace[1, :]) / 1e3 
+
+    triangle_plot(np.vstack((np.arange(trace.shape[1]), trace)).T, 
+                  axis_labels=[r'$\alpha$', r'$\beta$', r'$\sigma_I$'], 
+                  wspace=0.0,
+                  hspace=0.0,
+                  nticks=4,
+                  nbins=80,
+                  figsize=figsize(0.7))  
