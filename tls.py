@@ -23,21 +23,16 @@ import numpy as np
 import emcee 
 from corner_plot import corner_plot
 import matplotlib.pyplot as plt 
-from PlottingTools.plot_setup import figsize, set_plot_properties
 import palettable 
 
 
 def scatter_plot(trace):
 
-
-    # Configure style of plot 
-    set_plot_properties() 
-
     # Change color map 
     cs = palettable.colorbrewer.qualitative.Set1_3.mpl_colors
 
     # Set up figure 
-    fig, ax = plt.subplots(figsize=figsize(0.75, vscale=0.9))
+    fig, ax = plt.subplots(figsize=(6,4))
 
     # Get data
     xi, yi, dxi, dyi, rho_xy = get_data() 
@@ -63,8 +58,8 @@ def scatter_plot(trace):
     ax.set_xlim(3.3, 4)
     ax.set_ylim(ax.get_xlim())
 
-    ax.set_xlabel(r'log FWHM H$\alpha$ [km~$\rm{s}^{-1}$]')
-    ax.set_ylabel(r'log FWHM H$\beta$ [km~$\rm{s}^{-1}$]')
+    ax.set_xlabel(r'log FWHM H$\alpha$ [km s$^{-1}$]')
+    ax.set_ylabel(r'log FWHM H$\beta$ [km s$^{-1}$]')
 
     fig.tight_layout()
 
@@ -255,7 +250,7 @@ if __name__ == '__main__':
                 hspace=0.0,
                 nticks=4,
                 nbins=80,
-                figsize=figsize(0.7, 1),
+                figsize=(6,6),
                 fontsize=11, 
                 tickfontsize=11)  
 
