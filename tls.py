@@ -13,12 +13,15 @@ Following Hogg et al. 2010, arXiv 1008.4686, the fit is done in terms of
 b is the perpendicular distance from the line to the origin. Uniform priors are placed
 on both of these parameters.  
 
+The corner_plot function, written by Angus Williams, can be found here
+https://github.com/anguswilliams91/CornerPlot 
+
 """
 
 import pandas as pd 
 import numpy as np 
 import emcee 
-# from PlottingTools.triangle_plot import triangle_plot
+from corner_plot import corner_plot
 import matplotlib.pyplot as plt 
 from PlottingTools.plot_setup import figsize, set_plot_properties
 import palettable 
@@ -65,7 +68,7 @@ def scatter_plot(trace):
 
     fig.tight_layout()
 
-    plt.show()
+    # plt.show()
 
     return None 
 
@@ -237,7 +240,7 @@ def fit_model():
 if __name__ == '__main__':
 
     # fit model 
-    fit_model()
+    # fit_model()
 
     # plot data + model 
     trace = np.load('trace.npy')
@@ -246,10 +249,14 @@ if __name__ == '__main__':
     # triangle plot of chains 
     trace[1, :] = (10**trace[1, :]) / 1e3 
 
-    triangle_plot(np.vstack((np.arange(trace.shape[1]), trace)).T, 
-                  axis_labels=[r'$\alpha$', r'$\beta$', r'$\sigma_I$'], 
-                  wspace=0.0,
-                  hspace=0.0,
-                  nticks=4,
-                  nbins=80,
-                  figsize=figsize(0.7))  
+    corner_plot(trace.T, 
+                axis_labels=[r'$\alpha$', r'$\beta$', r'$\sigma_I$'], 
+                wspace=0.0,
+                hspace=0.0,
+                nticks=4,
+                nbins=80,
+                figsize=figsize(0.7, 1),
+                fontsize=11, 
+                tickfontsize=11)  
+
+    plt.show() 
